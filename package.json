@@ -4,11 +4,27 @@
   "description": "Integrating tensorflow js in web app",
   "main": "index.js",
   "scripts": {
+    "start": "node server/index.js",
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development && node server/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "tensorflow"
   ],
   "author": "Arup Sarkar",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@babel/core": "^7.17.7",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.16.7",
+    "babel-loader": "^8.2.3",
+    "express": "^4.17.3",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
+  }
 }

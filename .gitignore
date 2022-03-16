@@ -1,1 +1,11 @@
+# Deployment directories
 .idea/
+node_modules/
+dist
+
+# Optional npm cache directory
+.npm
+# Mac
+.DS_Store
+
+
