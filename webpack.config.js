@@ -15,9 +15,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.(js|jsx|png|svg|jpg|gif)$/,
-                loader: "file-loader",
-                options: { name: '/static/[hash].[ext]' },
+                test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
                 use: {
                     loader: "babel-loader"
