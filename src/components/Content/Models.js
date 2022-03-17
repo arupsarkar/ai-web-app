@@ -85,7 +85,7 @@ export const Models = () => {
                       ref={textArea}
                       defaultValue={passage}
                   />
-                    <Input ref={inputText} defaultValue="What is important to YouTube?" />
+                    <Input ref={inputText} defaultValue="who are popular in youtube?" />
                     <Button onClick={handleSearch}>Search</Button>
                     <pre style={{ whiteSpace: "normal" }}>{result}</pre>
                 </VStack>
