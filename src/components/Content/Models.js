@@ -76,37 +76,22 @@ export const Models = () => {
 
     return (
         <Box m="8" border="1px solid" borderColor="gray.400" w="1000px" borderRadius="lg">
-            <FormControl>
-                {loaded ? <Badge fontSize="0.8em" colorScheme="green">Tensorflow Models - QNA</Badge> :
-                    <Badge fontSize="0.8em" colorScheme="red">Problem loading JS scripts</Badge>}
-                <VStack>
-                  <Textarea
-                      style={{ width: "100%" }}
-                      ref={textArea}
-                      defaultValue={passage}
-                  />
-                    <Input ref={inputText} defaultValue="who are popular in youtube?" />
-                    <Button onClick={handleSearch}>Search</Button>
-                    <pre style={{ whiteSpace: "normal" }}>{result}</pre>
-                </VStack>
-            </FormControl>
-            {/*<Box w="100%" h="200px" bg="gray.100" borderTopRadius="lg"></Box>*/}
-            {/*<Box p="4">*/}
-            {/*    <Badge fontSize="0.8em" colorScheme="red">*/}
-            {/*        Popular*/}
-            {/*    </Badge>*/}
-            {/*    <Text fontSize="2xl" fontWeight="bold">*/}
-            {/*        Brawhala*/}
-            {/*    </Text>*/}
-            {/*    <Text fontSize="xs" mb="6">*/}
-            {/*        Toronto, Canada*/}
-            {/*    </Text>*/}
-            {/*    <Flex>*/}
-            {/*        <Text fontSize="xs">Starting at $50/day</Text>*/}
-            {/*        <Spacer />*/}
-            {/*        <Button size="xs">Expand</Button>*/}
-            {/*    </Flex>*/}
-            {/*</Box>*/}
+            <Box m={2}>
+                <FormControl>
+                    {loaded ? <Badge fontSize="0.8em" colorScheme="green">Tensorflow Model: qna</Badge> :
+                        <Badge fontSize="0.8em" colorScheme="red">Problem loading JS scripts</Badge>}
+                    <VStack>
+                        <Textarea
+                            style={{ width: "100%" }}
+                            ref={textArea}
+                            defaultValue={passage}
+                        />
+                        <Input ref={inputText} defaultValue="who are popular in youtube?" />
+                        <Button onClick={handleSearch}>Search</Button>
+                        <pre style={{ whiteSpace: "normal" }}>{result}</pre>
+                    </VStack>
+                </FormControl>
+            </Box>
         </Box>
     )
 }

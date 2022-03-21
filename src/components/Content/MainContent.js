@@ -1,6 +1,7 @@
 import React from 'react'
-import {Flex, Text} from "@chakra-ui/react";
+import {Flex, Text, VStack} from "@chakra-ui/react";
 import {Models} from "./Models";
+import {ObjectDetection} from "./ObjectDetection";
 
 export const MainContent = () => {
     return (
@@ -9,7 +10,11 @@ export const MainContent = () => {
                 Models
             </Text>
             <Flex w="min-content" m="0 auto">
-                <Models />
+                <VStack>
+                    {/*<Models />*/}
+                    <ObjectDetection/>
+                </VStack>
+
             </Flex>
         </>
     )
