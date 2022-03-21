@@ -17,6 +17,7 @@ export const ObjectDetection = () => {
     const [cocoSsdModel, setcocoSsdModel] = useState()
     const [draw, setDraw] = useState()
     const [ctx, setCtx] = useState()
+    const [video, setVideo] = useState()
 
     const videoConstraints = {
         height: 1080,
@@ -24,61 +25,61 @@ export const ObjectDetection = () => {
         facingMode: "environment",
     }
 
-    const cocoSsdPredictions = async () => {
-
-        const model = await cocoSsd.load()
-        setcocoSsdModel(model)
-        console.log('---> coco-ssd model loaded')
-        const predictions = await model.detect(document.getElementById('img'))
-
-        console.log('---> returned ctx', ctx)
-        await ctx.clearRect(0,0, webcamRef.current.video.videoWidth,webcamRef.current.video.videoHeight)
-
-        if (predictions.length > 0) {
-            console.log('predictions', predictions)
-            for (let n = 0; n < predictions.length; n++) {
-                console.log(n)
-                if (predictions[n].score > 0.8) {
-                    let bboxLeft = predictions[n].bbox[0]
-                    let bboxTop = predictions[n].bbox[1]
-                    let bboxWidth = predictions[n].bbox[2]
-                    let bboxHeight = predictions[n].bbox[3] - bboxTop
-
-                    console.log("bboxLeft: " + bboxLeft)
-                    console.log("bboxTop: " + bboxTop)
-
-                    console.log("bboxWidth: " + bboxWidth)
-
-                    console.log("bboxHeight: " + bboxHeight)
-
-                    ctx.beginPath()
-                    ctx.font = "28px Arial"
-                    ctx.fillStyle = "red"
-
-                    ctx.fillText(
-                        predictions[n].class +
-                        ": " +
-                        Math.round(parseFloat(predictions[n].score) * 100) +
-                        "%",
-                        bboxLeft,
-                        bboxTop
-                    )
-
-                    ctx.rect(bboxLeft, bboxTop, bboxWidth, bboxHeight)
-                    ctx.strokeStyle = "#FF0000"
-
-                    ctx.lineWidth = 3
-                    ctx.stroke()
-
-                    console.log("detected")
-                }
-
-            }
-        }
-
-        //Rerun prediction by timeout
-        setTimeout(() => cocoSsdPredictions(), 500);
-    }
+    // const cocoSsdPredictions = async () => {
+    //
+    //     const model = await cocoSsd.load()
+    //     setcocoSsdModel(model)
+    //     console.log('---> coco-ssd model loaded')
+    //     const predictions = await model.detect(document.getElementById('img'))
+    //
+    //     console.log('---> returned ctx', ctx)
+    //     await ctx.clearRect(0,0, webcamRef.current.video.videoWidth,webcamRef.current.video.videoHeight)
+    //
+    //     if (predictions.length > 0) {
+    //         console.log('predictions', predictions)
+    //         for (let n = 0; n < predictions.length; n++) {
+    //             console.log(n)
+    //             if (predictions[n].score > 0.8) {
+    //                 let bboxLeft = predictions[n].bbox[0]
+    //                 let bboxTop = predictions[n].bbox[1]
+    //                 let bboxWidth = predictions[n].bbox[2]
+    //                 let bboxHeight = predictions[n].bbox[3] - bboxTop
+    //
+    //                 console.log("bboxLeft: " + bboxLeft)
+    //                 console.log("bboxTop: " + bboxTop)
+    //
+    //                 console.log("bboxWidth: " + bboxWidth)
+    //
+    //                 console.log("bboxHeight: " + bboxHeight)
+    //
+    //                 ctx.beginPath()
+    //                 ctx.font = "28px Arial"
+    //                 ctx.fillStyle = "red"
+    //
+    //                 ctx.fillText(
+    //                     predictions[n].class +
+    //                     ": " +
+    //                     Math.round(parseFloat(predictions[n].score) * 100) +
+    //                     "%",
+    //                     bboxLeft,
+    //                     bboxTop
+    //                 )
+    //
+    //                 ctx.rect(bboxLeft, bboxTop, bboxWidth, bboxHeight)
+    //                 ctx.strokeStyle = "#FF0000"
+    //
+    //                 ctx.lineWidth = 3
+    //                 ctx.stroke()
+    //
+    //                 console.log("detected")
+    //             }
+    //
+    //         }
+    //     }
+    //
+    //     //Rerun prediction by timeout
+    //     setTimeout(() => cocoSsdPredictions(), 500);
+    // }
 
     const enableWebCam = async () => {
         setenableCamera(false)
@@ -99,6 +100,77 @@ export const ObjectDetection = () => {
         setCtx(context)
         console.log('---> canvas', draw)
         console.log('---> context', ctx)
+    }
+    const videoRef = async (video) => {
+        if( !video ) return
+        console.log('---> video ', video)
+        setVideo(video)
+        const model = await cocoSsd.load()
+        setcocoSsdModel(model)
+        // getUsermedia parameters to force video but not audio.
+        const constraints = {
+            video: true
+        }
+        // Activate the webcam stream.
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then((stream) => {
+                video.srcObject = stream;
+                video.addEventListener('loadeddata', async (model) => {
+                    await predictWebcam(model)
+                });
+                // video.onloadedmetadata = (e) => {
+                //     video.play();
+                //     console.log('---> starting streaming and capturing predictions ')
+                //     predictWebcam(model)
+                //         .then(result => {
+                //             console.log(result)
+                //         })
+                // }
+            })
+
+    }
+    let children = []
+    const predictWebcam = async (model) => {
+        const liveView = document.getElementById('liveView')
+        console.log('---> coco-ssd model loaded')
+        model.detect(video)
+            .then((predictions) => {
+                console.log('---> predictions ', predictions)
+                // Remove any highlighting we did previous frame.
+                for (let i = 0; i < children.length; i++) {
+                    liveView.removeChild(children[i]);
+                }
+                children.splice(0)
+                for (let n = 0; n < predictions.length; n++) {
+                    if (predictions[n].score > 0.66) {
+                        const p = document.createElement('p')
+                        p.innerText = predictions[n].class  + ' - with '
+                            + Math.round(parseFloat(predictions[n].score) * 100)
+                            + '% confidence.'
+                        p.style = 'margin-left: ' + predictions[n].bbox[0] + 'px; margin-top: '
+                            + (predictions[n].bbox[1] - 10) + 'px; width: '
+                            + (predictions[n].bbox[2] - 10) + 'px; top: 0; left: 0;'
+
+                        const highlighter = document.createElement('div');
+                        highlighter.setAttribute('class', 'highlighter');
+                        highlighter.style = 'left: ' + predictions[n].bbox[0] + 'px; top: '
+                            + predictions[n].bbox[1] + 'px; width: '
+                            + predictions[n].bbox[2] + 'px; height: '
+                            + predictions[n].bbox[3] + 'px;'
+
+                        liveView.appendChild(highlighter)
+                        liveView.appendChild(p)
+                        children.push(highlighter)
+                        children.push(p)
+                    }
+                }
+
+                //window.requestAnimationFrame(predictWebcam)
+            })
+            .catch(error => {
+                console.error('---> error predictWebcam ', error)
+            })
+        setTimeout(() => predictWebcam(model), 500)
     }
 
     useEffect(() => {
@@ -129,15 +201,16 @@ export const ObjectDetection = () => {
                                 </Text>
                             </div> :
                             <div>
-                                <div style={{ position: "absolute", top: "400px", zIndex: "9999" }}>
-                                    <canvas
-                                        id='imgCanvas'
-                                        ref={refHandler}
-                                        width={videoWidth}
-                                        height={videoHeight}
-                                        style={{ backgroundColor: "transparent" }}
-                                    />
-                                </div>
+                                {/*<div style={{ position: "absolute", top: "400px", zIndex: "9999" }}>*/}
+                                {/*    <canvas*/}
+                                {/*        id='imgCanvas'*/}
+                                {/*        ref={refHandler}*/}
+                                {/*        width={videoWidth}*/}
+                                {/*        height={videoHeight}*/}
+                                {/*        style={{ backgroundColor: "transparent" }}*/}
+                                {/*    />*/}
+                                {/*</div>*/}
+
                             </div>
                     }
 
@@ -156,14 +229,17 @@ export const ObjectDetection = () => {
                                             <Button onClick={disableWebCam}>Disable Webcam</Button>
 
                                             <div style={{ position: "absolute", top: "400px" }}>
-                                                <Webcam
-                                                    audio={false}
-                                                    id='img'
-                                                    ref={webcamRef}
-                                                    screenshotQuality={1}
-                                                    screenshotFormat="image/jpeg"
-                                                    videoConstraints={videoConstraints}
-                                                />
+                                                <div id="liveView" className="camView">
+                                                    <video id='webcam' autoPlay={true} width="640" height="480" ref={videoRef}></video>
+                                                </div>
+                                                {/*<Webcam*/}
+                                                {/*    audio={false}*/}
+                                                {/*    id='img'*/}
+                                                {/*    ref={webcamRef}*/}
+                                                {/*    screenshotQuality={1}*/}
+                                                {/*    screenshotFormat="image/jpeg"*/}
+                                                {/*    videoConstraints={videoConstraints}*/}
+                                                {/*/>*/}
                                             </div>
                                         </div>
                                 }
